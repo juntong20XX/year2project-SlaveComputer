@@ -166,33 +166,23 @@ void setup() {
 
     init_led();
 
-    // init_ping();
+    init_ping();
 
     servo_init(0);
 
     Serial.begin(115200);
-    // stf.begin(Serial);
+    stf.begin(Serial);
 }
 
 
 // --- LOOP
 
 void loop() {
-    // led_on();
-    // if (ping() == 0) {
-    // } else {
-    //     led_off();
-    // }
-    // delay(500);
-    
-    // 示例：在不同角度间切换
-    Serial.println(0);
-    servo_to(0);   // 旋转到 0 度
-    delay(1000);
-    Serial.println(90);
-    servo_to(90); // 旋转到 90 度
-    delay(1000);
-    Serial.println(-90);
-    servo_to(180); // 旋转到 180 度
-    delay(1000);
+    led_on();
+    if (ping() == 0) {
+        
+    } else {
+        led_off();
+    }
+    delay(500);
 }
