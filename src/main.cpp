@@ -68,6 +68,8 @@ int ping_res_chk(const STRUCT_Message& msg) {
 }
 
 int ping() {
+    static uint8_t passed_times = 0b00000111;
+
     ping_func();
 
     delay(300);
@@ -78,7 +80,24 @@ int ping() {
 
     stf.rxObj(Message, 0);
 
-    return ping_res_chk(Message);
+    int passed = ping_res_chk(Message);
+
+    passed_times <<= 1;
+
+    if (passed != 0) {
+        return passed;
+    }
+
+    // check times
+    passed_times += 1;
+    uint8_t counting = 0;
+    for (; passed < 8; passed++) {
+        counting += (passed_times & (1 << passed)) == 0;
+        if (counting >= 4) {
+            return -3;
+        }
+    }
+    return 0;
 }
 
 
@@ -88,7 +107,7 @@ int ping() {
 void setup() {
 
     init_led();
-    
+
     init_ping();
 
     Serial.begin(115200);
