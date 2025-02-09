@@ -1,5 +1,3 @@
-#include "Arduino.h"
-
 #define LED_PIN 13
 
 bool LED_IS_ON = false;

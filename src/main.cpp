@@ -46,6 +46,11 @@ void led_on() {
 // #  loop ping                       #
 // ####################################
 
+void init_ping() {
+    PingMSG.msg_type = 0x0001;
+    memcpy(PingMSG.data, TYPE_CODE, 4);
+}
+
 int ping_func() {
     stf.txObj(PingMSG, 0);
     stf.sendData(8);
@@ -56,10 +61,8 @@ int ping_res_chk(const STRUCT_Message& msg) {
     if (msg.msg_type != 0x0001) {
         return -1;
     }
-    for (int i=0; i < 4; i++) {
-        if (((int) msg.data[i]) != 0) {
-            return -1;
-        }
+    if (memcmp(msg.data, "-hc-", 4) != 0) {
+        return -2;
     }
     return 0;
 }
@@ -81,13 +84,11 @@ int ping() {
 
 // --- INIT
 
-void init_ping() {
-    PingMSG.msg_type = 0x0001;
-    memcpy(PingMSG.data, TYPE_CODE, 4);
-}
 
 void setup() {
 
+    init_led();
+    
     init_ping();
 
     Serial.begin(115200);
