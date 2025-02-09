@@ -109,7 +109,7 @@ int ping() {
 // #  Joint Servo                     #
 // ####################################
 
-void servo_init(int initial_position) {
+void init_servo(int initial_position) {
     // 初始化舵机
     servo.attach(SERVO_PIN);
     
@@ -158,6 +158,14 @@ void servo_to(int targetAngle) {
     servo.write(servo_current_angle);
 }
 
+// ####################################
+// #  Waiting Loop                    #
+// ####################################
+
+void waiting_loop() {
+
+}
+
 
 // --- INIT
 
@@ -168,7 +176,7 @@ void setup() {
 
     init_ping();
 
-    servo_init(0);
+    init_servo(0);
 
     Serial.begin(115200);
     stf.begin(Serial);

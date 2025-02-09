@@ -10,7 +10,7 @@ int servo_current_angle = 90; // 初始默认中间位置
 // #  Joint Servo                     #
 // ####################################
 
-void servo_init(int initial_position) {
+void init_servo(int initial_position) {
     // 初始化舵机
     servo.attach(SERVO_PIN);
     
@@ -65,7 +65,7 @@ void servo_to(int targetAngle) {
 
 void setup() {
 
-    servo_init(0);
+    init_servo(0);
 
     Serial.begin(115200);
     // stf.begin(Serial);
