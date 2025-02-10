@@ -123,6 +123,15 @@ void init_servo(int initial_position) {
 }
 
 void servo_to(int targetAngle) {
+    // 非常好 debug 代码
+    // Message.msg_type = 0x0014;
+    // memset(Message.data, 0, 4);
+    // itoa(targetAngle, Message.data, 10);
+    // stf.txObj(Message, 0);
+    // stf.sendData(8);
+    
+    // targetAngle = constrain(targetAngle, 0, 180);
+
     // 确保目标角度在有效范围内
     targetAngle = constrain(targetAngle, 0, 180);
     
@@ -172,7 +181,7 @@ bool exec_command() {
         break;
     case 0x0131:
         // servo
-        servo_to((int) Message.data);
+        servo_to(*(int *) Message.data);  // 非常好指针代码
         break;
     
     default:
