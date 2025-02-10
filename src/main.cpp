@@ -18,6 +18,7 @@ int servo_current_angle = 90; // 初始默认中间位置
 
 
 STRUCT_Message Message = {0, 0};
+STRUCT_Message CheckBox = {0, 0};
 STRUCT_Message PingMSG = {0, 0};
 
 
@@ -162,8 +163,101 @@ void servo_to(int targetAngle) {
 // #  Waiting Loop                    #
 // ####################################
 
-void waiting_loop() {
+bool exec_command() {
+    bool success = true;
+    switch (-Message.msg_type) {
+        // 注意, 重放时将 msg_type 改为了原来的负数
+    case 0x0120:
+        // Nothing
+        break;
+    case 0x0131:
+        // servo
+        servo_to((int) Message.data);
+        break;
+    
+    default:
+        success = false;
+        break;
+    }
+    return success;
+}
 
+
+int waiting_res_chk(const STRUCT_Message& msg) {
+    if (msg.msg_type < 0x0100 or msg.msg_type > 0xffff) {
+        // msg_type out of command code range
+        return -1;
+    }
+    return 0;
+}
+
+void waiting_loopcall() {
+    // setup waiting-signal message
+    Message.msg_type = 0x0011;
+    memset(Message.data, 0, 4);
+    // send waiting signal
+    stf.txObj(Message, 0);
+    stf.sendData(8);
+    // wait command
+    uint8_t times;
+    for (times = 0; times < 4; times++){
+        // waiting
+        delay(300);
+        // r?
+        if (not stf.available()) {
+            continue;
+        }
+        // check
+        stf.rxObj(Message, 0);
+        if (waiting_res_chk(Message) != 0) {
+            continue;
+        } else {
+            break;
+        }
+    }
+    if (times >= 4) {
+        return;
+    }
+
+    // repeat command
+    Message.msg_type = -Message.msg_type;
+    stf.txObj(Message, 0);
+    stf.sendData(8);
+
+    // wait answer
+    for (times = 0; times < 4; times++){
+        // waiting
+        delay(300);
+        // r?
+        if (not stf.available()) {
+            continue;
+        }
+        // check
+        stf.rxObj(CheckBox, 0);
+        if (CheckBox.msg_type == 0x0012) {
+            break;
+        }
+    }
+    if (times >= 4) {
+        return;
+    }
+
+    // exec command
+    if (exec_command()) {
+        // success
+        Message.msg_type = 0x0014;
+        memset(Message.data, 0, 4);
+        stf.txObj(Message, 0);
+        stf.sendData(8);
+
+    } else {
+        // fail
+        Message.msg_type = 0x0013;
+        memset(Message.data, 0, 4);
+        stf.txObj(Message, 0);
+        stf.sendData(8);
+    }
+    
 }
 
 
@@ -176,7 +270,7 @@ void setup() {
 
     init_ping();
 
-    init_servo(0);
+    init_servo(90);
 
     Serial.begin(115200);
     stf.begin(Serial);
@@ -188,9 +282,10 @@ void setup() {
 void loop() {
     led_on();
     if (ping() == 0) {
-        
+        waiting_loopcall();
+        delay(100);
     } else {
         led_off();
+        delay(500);
     }
-    delay(500);
 }
