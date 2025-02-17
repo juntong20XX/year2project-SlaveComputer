@@ -179,6 +179,10 @@ bool exec_command() {
     case 0x0120:
         // Nothing
         break;
+    case 0x0130:
+        // 返回舵机角度
+        memset(Message.data, servo_current_angle, 4);
+        break;
     case 0x0131:
         // servo
         servo_to(*(int *) Message.data);  // 非常好指针代码
@@ -255,7 +259,7 @@ void waiting_loopcall() {
     if (exec_command()) {
         // success
         Message.msg_type = 0x0014;
-        memset(Message.data, 0, 4);
+        // memset(Message.data, 0, 4);
         stf.txObj(Message, 0);
         stf.sendData(8);
 
